@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Manage Faculty</h1>
+
+<div class="card" style="max-width: 600px; margin: 0 auto; margin-bottom: 2rem;">
+    <h3>Add New Faculty</h3>
+    <form method="POST" action="{{ url_for('faculty_add') }}">
+        <label>Faculty Name</label>
+        <input type="text" name="name" placeholder="E.g. Prof. John Doe" style="box-sizing: border-box; width: 100%;"
+            required>
+
+        <label style="margin-top: 1rem; display: block;">Gender</label>
+        <select name="gender" style="box-sizing: border-box; width: 100%; padding: 8px;">
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select>
+
+        <label style="margin-top: 1rem; display: block;">Assign Courses (Optional)</label>
+        <div
+            style="max-height: 150px; overflow-y: auto; border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; background: #f9f9f9; margin-bottom: 1rem;">
+            {% for c in courses %}
+            <div style="margin-bottom: 5px;">
+                <label style="font-weight: normal; cursor: pointer; display: flex; align-items: center;">
+                    <input type="checkbox" name="course_ids" value="{{ c.id }}"
+                        style="width: auto; margin-right: 8px; margin-bottom: 0;">
+                    {{ c.code }} - {{ c.name }}
+                </label>
+            </div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Add Faculty</button>
+    </form>
+</div>
+
+<div class="course-grid">
+    {% for fac in faculty %}
+    <div class="card">
+        <form method="POST" action="{{ url_for('faculty_update') }}">
+            <input type="hidden" name="id" value="{{ fac.id }}">
+            <label style="font-weight: bold;">Name</label>
+            <input type="text" name="name" value="{{ fac.name }}"
+                style="box-sizing: border-box; width: 100%; margin-bottom: 0.5rem;" required>
+
+            <label style="font-weight: bold; margin-top: 0.5rem; display: block;">Gender</label>
+            <select name="gender" onchange="updateGender(this, '{{ fac.id }}')"
+                style="box-sizing: border-box; width: 100%; padding: 5px; margin-bottom: 0.5rem; transition: background-color 0.3s; border-radius: 4px;">
+                <option value="" {% if not fac.gender %}selected{% endif %}>Select Gender</option>
+                <option value="Male" {% if fac.gender=='Male' %}selected{% endif %}>Male</option>
+                <option value="Female" {% if fac.gender=='Female' %}selected{% endif %}>Female</option>
+            </select>
+
+            <div style="margin-top: 1rem; margin-bottom: 1rem;">
+                <strong>Assigned Courses:</strong>
+                {% if fac.courses %}
+                <ul style="padding-left: 1.2rem; margin-top: 0.5rem; color: #555;">
+                    {% for c in fac.courses %}
+                    <li>{{ c.code }} - {{ c.name }}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p style="color: #999; margin-top: 0.5rem; font-style: italic;">No courses assigned.</p>
+                {% endif %}
+            </div>
+
+            <div class="actions" style="display: flex; gap: 10px; margin-top: 10px;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Update Name</button>
+                <button type="submit" formaction="{{ url_for('faculty_delete') }}" class="btn"
+                    style="flex: 1; background: #dc3545; color: white; border: none;">Delete</button>
+            </div>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    function updateGender(selectElem, facId) {
+        const formData = new FormData();
+        formData.append('id', facId);
+        formData.append('gender', selectElem.value);
+
+        // Visual cue: processing state
+        const originalBg = selectElem.style.backgroundColor || '';
+        selectElem.style.backgroundColor = '#f0f8f0';
+
+        fetch("{{ url_for('faculty_update_gender_ajax') }}", {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Success flash (light green)
+                    selectElem.style.backgroundColor = '#d4edda';
+                    setTimeout(() => {
+                        selectElem.style.backgroundColor = originalBg;
+                    }, 800);
+                } else {
+                    // Error flash (light red)
+                    selectElem.style.backgroundColor = '#f8d7da';
+                    setTimeout(() => {
+                        selectElem.style.backgroundColor = originalBg;
+                    }, 800);
+                }
+            })
+            .catch(error => {
+                console.error("Error updating gender:", error);
+                selectElem.style.backgroundColor = '#f8d7da';
+                setTimeout(() => { selectElem.style.backgroundColor = originalBg; }, 800);
+            });
+    }
+</script>
+{% endblock %}

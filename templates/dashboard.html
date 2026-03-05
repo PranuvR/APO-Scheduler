@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Dashboard</h1>
+
+<div class="stats-grid">
+    <div class="card stat-card">
+        <div class="stat-value">{{ s_count }}</div>
+        <div class="stat-label">Total Students</div>
+    </div>
+    <div class="card stat-card">
+        <div class="stat-value">{{ c_count }}</div>
+        <div class="stat-label">Active Courses</div>
+    </div>
+    <div class="card stat-card">
+        <div class="stat-value">{{ f_count }}</div>
+        <div class="stat-label">Faculty Members</div>
+    </div>
+    <div class="card stat-card">
+        <div class="stat-value">{{ res_count }}</div>
+        <div class="stat-label">Assignments Generated</div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Quick Actions</h2>
+    <div style="display: flex; gap: 1rem;">
+        <a href="{{ url_for('upload') }}" class="btn btn-primary">Upload New Data</a>
+        <a href="{{ url_for('optimize') }}" class="btn btn-primary">Run Optimization</a>
+    </div>
+</div>
+{% endblock %}

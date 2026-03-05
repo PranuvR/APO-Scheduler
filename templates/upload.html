@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Upload Data</h1>
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <h3>Step 1: Upload Files</h3>
+    <p style="color: #666; margin-bottom: 2rem;">
+        Upload either one or both files to update the system. Once both files are present, the system will process them.
+        <br><strong style="color: #dc3545;">Warning: Processing files will RESET all existing data.</strong>
+    </p>
+
+    <form method="POST" enctype="multipart/form-data">
+        <div style="margin-bottom: 1.5rem;">
+            <label style="font-weight: bold; display: block; margin-bottom: 0.5rem;">1. Student Electives Data
+                (Consolidated)
+                {% if cons_exists %}
+                <span style="color: #28a745; font-size: 0.9em; margin-left: 10px;">&#10004; Currently Uploaded</span>
+                {% else %}
+                <span style="color: #dc3545; font-size: 0.9em; margin-left: 10px;">&#10008; Not Uploaded</span>
+                {% endif %}
+            </label>
+            <input type="file" name="consolidated_file" accept=".xlsx" class="form-control">
+            <small style="color: #666; display: block; margin-top: 5px;">Upload a new file to replace the existing
+                one.</small>
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <label style="font-weight: bold; display: block; margin-bottom: 0.5rem;">2. Course & Faculty Details
+                {% if fac_exists %}
+                <span style="color: #28a745; font-size: 0.9em; margin-left: 10px;">&#10004; Currently Uploaded</span>
+                {% else %}
+                <span style="color: #dc3545; font-size: 0.9em; margin-left: 10px;">&#10008; Not Uploaded</span>
+                {% endif %}
+            </label>
+            <input type="file" name="faculty_file" accept=".xlsx" class="form-control">
+            <small style="color: #666; display: block; margin-top: 5px;">Upload a new file to replace the existing
+                one.</small>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem;">
+            Upload & Process Data
+        </button>
+    </form>
+</div>
+{% endblock %}

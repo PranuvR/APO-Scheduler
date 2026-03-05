@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 2rem auto; text-align: center;" class="card">
+    <h2 style="color: var(--primary-color);">Generate Weekly Timetable</h2>
+    <p style="color: var(--text-color); margin-bottom: 2rem;">
+        This will compute the optimal weekly schedule for all course sections, ensuring no overlapping students and
+        adhering to faculty constraints.
+    </p>
+
+    <form method="POST" action="{{ url_for('schedule') }}">
+        <button type="submit" class="btn btn-primary" style="font-size: 1.1rem; padding: 12px 24px;"
+            onclick="this.innerHTML='Generating... Please hold on...'; this.style.opacity='0.8';">
+            Run Timetable Optimizer
+        </button>
+    </form>
+</div>
+{% endblock %}

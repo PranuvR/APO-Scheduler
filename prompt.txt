@@ -1,0 +1,6 @@
+help me create a portal
+APO- Academic Program Office, they should be able to upload an excel file which contains sheets (named elective codes) and the sheets have students of respective courses as a part of bidding process(like Term_6 Consolidated.xslx). They should also be able to upload Course Details like the sheet in Term6_Schedule_Section details excel.
+
+Once they upload this if they click a button based on the given python code(if required you can modify), the schedule must be designed for the faculty and students without any overlapping.
+
+Help me create a portal for the same, you can use multiple pages for this.

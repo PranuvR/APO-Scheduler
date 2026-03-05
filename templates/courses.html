@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .course-card.frozen {
+        border: 2px solid #ff9800;
+        background-color: #fff8e1;
+    }
+</style>
+<script>
+    function toggleFreeze(courseId) {
+        fetch('/courses/toggle_freeze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'course_id=' + courseId
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error toggling freeze state');
+                }
+            });
+    }
+</script>
+
+<h1>Manage Courses</h1>
+<div class="course-grid">
+    {% for course in courses %}
+    <div class="card course-card{% if course.is_frozen %} frozen{% endif %}" id="card-{{ course.id }}">
+        <div class="course-view">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <h3 style="margin-top: 0; margin-bottom: 0.5rem; color: var(--primary-color);">{{ course.code }}
+                    </h3>
+                    <h4 style="margin: 0; color: var(--text-color);">{{ course.name }}</h4>
+                </div>
+                <button onclick="toggleEdit('{{ course.id }}')"
+                    style="background: none; border: none; cursor: pointer; color: var(--secondary-color);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                    </svg>
+                </button>
+            </div>
+            <div style="margin-top: 1rem;">
+                <strong>Faculty:</strong>
+                {% if course.faculties %}
+                <ul style="padding-left: 1.2rem; margin-top: 0.5rem;">
+                    {% for f in course.faculties %}
+                    <li>{{ f.name }}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <span style="color: #999;">None Assigned</span>
+                {% endif %}
+            </div>
+            <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                {% if course.is_frozen %}
+                <div style="color: #ff9800; font-size: 0.9rem;">
+                    <strong>⚠ Frozen (All in one section)</strong>
+                </div>
+                {% else %}
+                <div></div>
+                {% endif %}
+                <button type="button" class="btn" onclick="toggleFreeze('{{ course.id }}')"
+                    style="background-color: {% if course.is_frozen %}#ff9800{% else %}#e0e0e0{% endif %}; color: {% if course.is_frozen %}#fff{% else %}#333{% endif %}; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                    {% if course.is_frozen %}Unfreeze{% else %}Freeze Course{% endif %}
+                </button>
+            </div>
+        </div>
+
+        <form method="POST" class="course-edit"
+            style="display: none; margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+            <input type="hidden" name="id" value="{{ course.id }}">
+
+            <label>Code</label>
+            <input type="text" name="code" value="{{ course.code }}" required>
+
+            <label>Name</label>
+            <input type="text" name="name" value="{{ course.name }}" required>
+
+            <label>Faculty (Select all that apply)</label>
+            <div
+                style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; background: #fff;">
+                {% for fac in faculty %}
+                <div style="margin-bottom: 5px; display: flex; align-items: center;">
+                    <input type="checkbox" id="fac-{{ course.id }}-{{ fac.id }}" name="faculty_ids" value="{{ fac.id }}"
+                        {% if fac in course.faculties %}checked{% endif %}
+                        style="width: auto; margin-right: 8px; margin-bottom: 0;">
+                    <label for="fac-{{ course.id }}-{{ fac.id }}" style="margin-bottom: 0; cursor: pointer;">{{ fac.name
+                        }}</label>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div style="margin: 1rem 0;">
+                <label>
+                    <input type="checkbox" name="is_frozen" style="width: auto;" {% if course.is_frozen %}checked{%
+                        endif %}>
+                    Frozen (Don't Split)
+                </label>
+            </div>
+
+            <div class="actions">
+                <button type="button" class="btn" onclick="toggleEdit('{{ course.id }}')"
+                    style="background: #ccc; margin-right: 0.5rem;">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

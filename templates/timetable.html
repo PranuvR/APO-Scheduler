@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .timetable-grid {
+        display: grid;
+        grid-template-columns: 100px repeat(7, 1fr);
+        gap: 1px;
+        background-color: var(--border-color);
+        border: 1px solid var(--border-color);
+        margin-top: 1rem;
+        overflow-x: auto;
+    }
+
+    .tt-header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 10px;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .tt-cell {
+        background-color: #fff;
+        padding: 8px;
+        min-height: 80px;
+        font-size: 0.85rem;
+    }
+
+    .tt-cell.time-col {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .class-block {
+        background-color: #e3f2fd;
+        border-left: 3px solid var(--secondary-color);
+        padding: 4px;
+        margin-bottom: 4px;
+        border-radius: 2px;
+    }
+
+    .class-code {
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .class-fac {
+        font-size: 0.75rem;
+        color: #666;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+
+<div style="display: flex; justify-content: space-between; align-items: center; padding-right: 120px;">
+    <h1>Weekly Timetable</h1>
+    <div style="display: flex; gap: 10px;">
+        <a href="{{ url_for('download') }}" class="btn" style="background-color: var(--secondary-color);">Download
+            Consolidated Schedule</a>
+        <a href="{{ url_for('schedule') }}" class="btn">Regenerate</a>
+    </div>
+</div>
+
+{% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+{% set times = [
+'09:00 - 10:30',
+'10:45 - 12:15',
+'12:30 - 14:00',
+'15:00 - 16:30',
+'16:45 - 18:15',
+'18:30 - 20:00',
+'20:15 - 21:45'
+] %}
+
+<div class="card" style="padding: 0; overflow: hidden; margin-top: 1rem;">
+    <div class="timetable-grid">
+        <!-- Header Row -->
+        <div class="tt-header">Time / Day</div>
+        {% for day in days %}
+        <div class="tt-header">{{ day }}</div>
+        {% endfor %}
+
+        <!-- Time Slots -->
+        {% for s in range(7) %}
+        <div class="tt-cell time-col">{{ times[s] }}</div>
+        {% for d in range(7) %}
+        <div class="tt-cell drop-zone" draggable="true" data-day="{{ d }}" data-slot="{{ s }}"
+            ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+            ondrop="handleDrop(event)">
+            {% if d in timetable and s in timetable[d] %}
+            {% for item in timetable[d][s] %}
+            <div class="class-block">
+                <div class="class-code">{{ item.course_code }}-{{ item.section }}</div>
+                <div class="class-name" style="font-weight: 600; font-size: 0.8rem; margin: 2px 0;">{{ item.course_name
+                    }}</div>
+                {% if item.faculty_names %}
+                <div class="class-fac" title="{{ item.faculty_names }}">{{ item.faculty_names }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+        {% endfor %}
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function handleDragStart(e) {
+        e.dataTransfer.setData("text/plain", JSON.stringify({
+            day: e.target.closest('.tt-cell').dataset.day,
+            slot: e.target.closest('.tt-cell').dataset.slot
+        }));
+        e.target.style.opacity = '0.4';
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.currentTarget.classList.add('drag-over');
+    }
+
+    function handleDragLeave(e) {
+        e.currentTarget.classList.remove('drag-over');
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('drag-over');
+
+        const sourceData = JSON.parse(e.dataTransfer.getData("text/plain"));
+        const targetDay = e.currentTarget.dataset.day;
+        const targetSlot = e.currentTarget.dataset.slot;
+
+        if (sourceData.day === targetDay && sourceData.slot === targetSlot) {
+            e.target.style.opacity = '1';
+            return;
+        }
+
+        fetch('/api/swap_slots', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                day1: sourceData.day,
+                slot1: sourceData.slot,
+                day2: targetDay,
+                slot2: targetSlot
+            })
+        }).then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert("Swap failed!");
+                    window.location.reload();
+                }
+            });
+    }
+
+    document.querySelectorAll('.tt-cell').forEach(cell => {
+        cell.addEventListener('dragend', (e) => {
+            e.target.style.opacity = '1';
+        });
+    });
+</script>
+
+<style>
+    .tt-cell.drop-zone {
+        cursor: grab;
+        transition: background-color 0.2s;
+    }
+
+    .tt-cell.drop-zone:active {
+        cursor: grabbing;
+    }
+
+    .tt-cell.drag-over {
+        background-color: #e8f5e9 !important;
+        border: 2px dashed var(--secondary-color) !important;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div
+    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-right: 120px;">
+    <h1>Section Result</h1>
+    <div>
+        <a href="{{ url_for('optimize') }}" class="btn btn-primary" style="margin-right: 1rem;">Rerun Optimizer</a>
+        <a href="{{ url_for('download') }}" class="btn btn-primary">Download Excel</a>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Assignment Preview</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Student ID</th>
+                <th>Course Code</th>
+                <th>Section Assigned</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for res in results %}
+            <tr>
+                <td>{{ res.student_id }}</td>
+                <td>{{ res.course_code }}</td>
+                <td><span style="color: {{ '#03dac6' if res.section == 'A' else '#cf6679' }}; font-weight: bold;">{{
+                        res.section }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APO Scheduler</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        function toggleEdit(id) {
+            const card = document.getElementById('card-' + id);
+            const viewDiv = card.querySelector('.course-view');
+            const editForm = card.querySelector('.course-edit');
+
+            if (editForm.style.display === 'none') {
+                viewDiv.style.display = 'none';
+                editForm.style.display = 'block';
+            } else {
+                viewDiv.style.display = 'block';
+                editForm.style.display = 'none';
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="layout">
+        <nav class="sidebar">
+            <div class="brand">APO Portal</div>
+            <ul class="nav-links">
+                <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('upload') }}">Upload Data</a></li>
+                <li><a href="{{ url_for('courses') }}">Courses</a></li>
+                <li><a href="{{ url_for('faculty') }}">Faculty</a></li>
+                <li><a href="{{ url_for('results') }}">Section Result</a></li>
+                <li><a href="{{ url_for('timetable_view') }}">Weekly Timetable</a></li>
+            </ul>
+        </nav>
+        <main class="main-content">
+            <div class="top-right-branding">
+                <img src="{{ url_for('static', filename='iim_ranchi_logo.png') }}" alt="IIM Ranchi Logo">
+            </div>
+
+            <div class="content-wrap">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div class="card flash-{{ category }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+            </div>
+
+            <footer class="site-footer">
+                <p>Designed and Developed for My Beloved APO</p>
+                <p>With ❤️ Pranuv R (MBA-BA 24-26)</p>
+            </footer>
+        </main>
+    </div>
+</body>
+
+</html>
